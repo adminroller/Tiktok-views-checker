@@ -32,6 +32,11 @@ HERO_IMAGE_URL = ""
 st.set_page_config(page_title="Barber Daily TikTok Checker", layout="wide")
 
 # ---------------- Custom brown-gradient styling ----------------
+# NOTE: instead of manually opening/closing a <div> across separate
+# st.markdown() calls (which breaks in Streamlit - each call renders
+# independently, so a div opened in one call can't be closed in another),
+# we style Streamlit's own main content container directly. This makes
+# the whole page content sit inside one clean rounded "card" automatically.
 st.markdown(
     """
     <style>
@@ -45,11 +50,12 @@ st.markdown(
         background: radial-gradient(circle at 20% 20%, #E8CBA8 0%, #C9A579 35%, #8C5B33 100%);
     }
 
-    .hero-card {
-        background: rgba(255, 250, 244, 0.92);
+    /* Style Streamlit's real content container as the rounded card */
+    div[data-testid="stAppViewContainer"] > div:first-child .block-container {
+        background: rgba(255, 250, 244, 0.94);
         border-radius: 28px;
-        padding: 48px 56px 32px 56px;
-        margin: 24px auto 24px auto;
+        padding: 48px 56px 40px 56px;
+        margin: 24px auto;
         max-width: 1100px;
         box-shadow: 0 20px 60px rgba(60, 36, 18, 0.25);
     }
@@ -58,7 +64,7 @@ st.markdown(
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px;
+        margin-bottom: 30px;
     }
 
     .hero-logo {
@@ -68,7 +74,7 @@ st.markdown(
     }
 
     .hero-title {
-        font-size: 44px;
+        font-size: 40px;
         font-weight: 600;
         text-align: center;
         color: #3B2417;
@@ -84,6 +90,9 @@ st.markdown(
         margin: 0 auto 28px auto;
     }
 
+    div.stButton {
+        text-align: center;
+    }
     div.stButton > button {
         background-color: #6B4226;
         color: #FFF8F0;
@@ -119,8 +128,6 @@ st.markdown(
 )
 
 # ---------------- Hero section ----------------
-st.markdown('<div class="hero-card">', unsafe_allow_html=True)
-
 st.markdown(
     """
     <div class="hero-nav">
@@ -149,8 +156,6 @@ urls_input = st.text_area(
 )
 
 check_button = st.button("Check Stats", type="primary")
-
-st.markdown('</div>', unsafe_allow_html=True)  # close hero-card
 
 
 def get_video_stats(url: str) -> dict:
@@ -199,8 +204,7 @@ if check_button:
             df[col] = pd.to_numeric(df[col], errors="coerce")
         df = df.sort_values(by="Views", ascending=False, na_position="last")
 
-        st.markdown('<div class="hero-card">', unsafe_allow_html=True)
-        st.markdown(f'<div class="hero-title" style="font-size:28px;">Results ({len(urls)} checked)</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="hero-title" style="font-size:26px; margin-top:36px;">Results ({len(urls)} checked)</div>', unsafe_allow_html=True)
 
         def fmt(val):
             # Show a clean number, or N/A for failed/missing links
@@ -237,4 +241,3 @@ if check_button:
             file_name="tiktok_report.csv",
             mime="text/csv",
         )
-        st.markdown('</div>', unsafe_allow_html=True)
